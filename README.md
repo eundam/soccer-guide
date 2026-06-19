@@ -51,6 +51,7 @@ soccer-guide/
 │   └── pubs/                    # 펍 매장 사진
 ├── soccer_guide.erd             # ERD 
 └── pyproject.toml
+├──requirements.txt
 └──soccer_guide.db
 ```
 
