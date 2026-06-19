@@ -302,6 +302,40 @@ def main(page: ft.Page):
         page.show_dialog(search_dialog)
 
     # =====================
+    # 시작 화면 (랜딩)
+    # =====================
+    def show_home(e=None):
+        title_text.value = ""
+        content_area.controls.clear()
+        content_area.controls.append(
+            ft.Container(
+                padding=40,
+                content=ft.Column(
+                    horizontal_alignment="center",
+                    spacing=18,
+                    controls=[
+                        ft.Text("⚽", size=70, text_align="center"),
+                        ft.Text(
+                            "해외축구(EPL) 시청 가이드에 오신 것을 환영합니다",
+                            size=24, weight="bold", text_align="center"
+                        ),
+                        ft.Text(
+                            "2025-26 시즌 EPL 경기 일정과 중계 정보를 확인하고,\n"
+                            "내가 응원하는 팀의 경기를 함께 볼 수 있는 축구 펍을 추천받으세요.",
+                            size=15, text_align="center", color="#AAAAAA"
+                        ),
+                        ft.Container(height=10),
+                        ft.Text(
+                            "👆 위의 버튼을 눌러 원하는 기능을 선택하세요",
+                            size=14, weight="bold", text_align="center", color="#5B9BD5"
+                        ),
+                    ]
+                )
+            )
+        )
+        page.update()
+
+    # =====================
     # 상단 네비게이션 (텍스트 버튼)
     # =====================
     nav_bar = ft.Row(
@@ -309,6 +343,7 @@ def main(page: ft.Page):
         spacing=6,
         run_spacing=6,
         controls=[
+            ft.TextButton("🏠 홈", on_click=show_home),
             ft.TextButton("구단 목록", on_click=show_clubs),
             ft.TextButton("구단 검색", on_click=open_search_dialog),
             ft.TextButton("경기 일정", on_click=show_matches),
@@ -338,7 +373,7 @@ def main(page: ft.Page):
         )
     )
 
-    show_clubs()
+    show_home()
 
 
 ft.app(target=main)
