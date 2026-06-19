@@ -22,6 +22,7 @@ class PubRepository:
         pub_name,
         address,
         main_league,
+        support_team_id,
         pub_image_path
     ):
 
@@ -34,13 +35,14 @@ class PubRepository:
 
         conn.execute("""
             INSERT INTO Soccer_Pub
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         """,
         (
             next_id,
             pub_name,
             address,
             main_league,
+            support_team_id,
             pub_image_path
         ))
 

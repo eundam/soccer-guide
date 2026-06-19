@@ -17,6 +17,7 @@ class PubService:
         pub_name,
         address,
         league,
+        support_team_id,
         image_path
     ):
 
@@ -24,6 +25,7 @@ class PubService:
             pub_name,
             address,
             league,
+            support_team_id,
             image_path
         )
 

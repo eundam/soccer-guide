@@ -23,7 +23,7 @@ class ClubRepository:
             """
             SELECT *
             FROM Football_Club
-            WHERE team_name LIKE ?
+            WHERE team_name ILIKE ?
             """,
             (f"%{keyword}%",)
         ).fetchdf()
