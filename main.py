@@ -15,445 +15,377 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
     page.scroll = "auto"
 
-    result_area = ft.Column()
-
     # =====================
     # 입력 필드
     # =====================
-
-    pub_id_field = ft.TextField(
-        label="펍 ID (수정/삭제용)"
-    )
-    match_dropdown = ft.Dropdown(
-    label="추천받을 경기",
-    width=300
-)
-    
-
-    pub_name_field = ft.TextField(
-        label="펍 이름"
-    )
-
-    address_field = ft.TextField(
-        label="주소"
-    )
-
-    league_field = ft.TextField(
-        label="주요 리그"
-    )
-
-    image_field = ft.TextField(
-        label="이미지 경로"
-    )
-    club_search_field = ft.TextField(
-        label="구단 검색"
-    )
-    date_field = ft.TextField(
-        label="경기 날짜 (YYYY-MM-DD)"
-)
+    pub_id_field      = ft.TextField(label="펍 ID (수정/삭제용)")
+    pub_name_field    = ft.TextField(label="펍 이름")
+    address_field     = ft.TextField(label="주소")
+    league_field      = ft.TextField(label="주요 리그")
+    image_field       = ft.TextField(label="이미지 경로")
+    club_search_field = ft.TextField(label="구단 이름 검색", expand=True)
+    match_dropdown    = ft.Dropdown(label="추천받을 경기", expand=True)
 
     # =====================
-    # 구단 조회
+    # 컨텐츠 영역
     # =====================
+    content_area = ft.Column(scroll="auto", expand=True, spacing=12)
+    title_text   = ft.Text("⚽ 축구 구단 목록", size=20, weight="bold")
 
-    def show_clubs(e):
-
-        result_area.controls.clear()
-
-        clubs = club_service.get_all_clubs()
-
-        for club in clubs:
-
-            result_area.controls.append(
-                ft.Card(
-                    content=ft.Container(
-                        padding=10,
-                        content=ft.Row([
-                            ft.Image(
-                                src=club["logo_path"],
-                                width=60,
-                                height=60
-                            ),
-
-                            ft.Column([
-                                ft.Text(
-                                    club["team_name"],
-                                    size=18,
-                                    weight="bold"
-                                ),
-
-                                ft.Text(
-                                    club["league"]
-                                ),
-
-                                ft.Text(
-                                    club["manager"]
-                                )
-                            ])
-                        ])
-                    )
+    # =====================
+    # 구단 카드 생성
+    # =====================
+    def make_club_card(club):
+        return ft.Card(
+            elevation=4,
+            content=ft.Container(
+                padding=14,
+                width=180,
+                content=ft.Column(
+                    horizontal_alignment="center",
+                    spacing=8,
+                    controls=[
+                        ft.Image(
+                            src=club["logo_path"],
+                            width=60, height=60,
+                        ),
+                        ft.Text(club["team_name"], size=15, weight="bold",
+                                text_align="center"),
+                        ft.Text(club["league"], size=12, text_align="center"),
+                        ft.Text(club["manager"], size=12, text_align="center"),
+                    ]
                 )
             )
+        )
 
+    # =====================
+    # 구단 조회 (2열 wrap)
+    # =====================
+    def show_clubs(e=None):
+        title_text.value = "⚽ 축구 구단 목록"
+        content_area.controls.clear()
+        clubs = club_service.get_all_clubs()
+
+        rows = ft.Row(
+            wrap=True,
+            spacing=12,
+            run_spacing=12,
+        )
+        for club in clubs:
+            rows.controls.append(make_club_card(club))
+
+        content_area.controls.append(rows)
+        page.update()
+
+    # =====================
+    # 구단 검색
+    # =====================
+    def search_club(e=None):
+        title_text.value = "🔍 구단 검색 결과"
+        content_area.controls.clear()
+        clubs = club_service.search_club(club_search_field.value)
+
+        if not clubs:
+            content_area.controls.append(ft.Text("검색 결과가 없습니다."))
+        else:
+            rows = ft.Row(wrap=True, spacing=12, run_spacing=12)
+            for club in clubs:
+                rows.controls.append(make_club_card(club))
+            content_area.controls.append(rows)
         page.update()
 
     # =====================
     # 경기 조회
     # =====================
-
-    def show_matches(e):
-
-        result_area.controls.clear()
-
+    def show_matches(e=None):
+        title_text.value = "📅 경기 일정"
+        content_area.controls.clear()
         matches = match_service.get_matches()
-
         match_dropdown.options.clear()
 
         for match in matches:
-
             match_dropdown.options.append(
                 ft.dropdown.Option(
                     key=str(match["match_id"]),
                     text=f"{match['home_team']} VS {match['away_team']}"
-        )
-    )
-        page.update()
-        
-
-        for match in matches:
-
-            result_area.controls.append(
+                )
+            )
+            content_area.controls.append(
                 ft.Card(
                     content=ft.Container(
-                        padding=10,
-                        content=ft.Column([
-                            ft.Text(
-                                f"{match['home_team']} VS {match['away_team']}",
-                                size=18,
-                                weight="bold"
-                            ),
-
-                            ft.Text(
-                                str(match["match_time"])
-                            ),
-
-                            ft.Text(
-                                match["broadcast_platform"]
-                            )
-                        ])
+                        padding=16,
+                        content=ft.Column(
+                            spacing=6,
+                            controls=[
+                                ft.Text(
+                                    f"{match['home_team']}  VS  {match['away_team']}",
+                                    size=16, weight="bold"
+                                ),
+                                ft.Text(str(match["match_time"]), size=12),
+                                ft.Text(match["broadcast_platform"], size=12),
+                            ]
+                        )
                     )
                 )
             )
-
         page.update()
 
     # =====================
-    # 펍 전체 조회
+    # 펍 조회
     # =====================
-
-    def show_pubs(e):
-
-        result_area.controls.clear()
-
+    def show_pubs(e=None):
+        title_text.value = "🍺 펍 목록"
+        content_area.controls.clear()
         pubs = pub_service.get_all_pubs()
 
         for pub in pubs:
-
-            result_area.controls.append(
+            content_area.controls.append(
                 ft.Card(
                     content=ft.Container(
-                        padding=10,
-                        content=ft.Column([
-
-                            ft.Text(
-                                f"ID : {pub['pub_id']}",
-                                weight="bold"
-                            ),
-
-                            ft.Text(
-                                pub["pub_name"]
-                            ),
-
-                            ft.Text(
-                                pub["address"]
-                            ),
-
-                            ft.Text(
-                                pub["main_league"]
-                            ),
-
-                            ft.Image(
-                                src=pub["pub_image_path"],
-                                width=250
-                            )
-                        ])
+                        padding=14,
+                        content=ft.Column(
+                            spacing=4,
+                            controls=[
+                                ft.Text(f"ID {pub['pub_id']}  {pub['pub_name']}",
+                                        size=16, weight="bold"),
+                                ft.Text(pub["address"], size=13),
+                                ft.Text(pub["main_league"], size=12),
+                                ft.Image(src=pub["pub_image_path"],
+                                         width=200, height=120),
+                            ]
+                        )
                     )
                 )
             )
-
         page.update()
 
     # =====================
-    # 펍 등록
+    # 펍 추천
     # =====================
-
-    def add_pub(e):
-
-        pub_service.add_pub(
-            pub_name_field.value,
-            address_field.value,
-            league_field.value,
-            image_field.value
-        )
-
-        page.snack_bar = ft.SnackBar(
-            ft.Text("펍 등록 완료")
-        )
-
-        page.snack_bar.open = True
-
-        pub_name_field.value = ""
-        address_field.value = ""
-        league_field.value = ""
-        image_field.value = ""
-
-        
-        page.update()
-        show_pubs(None)
-
-    # =====================
-    # 펍 수정
-    # =====================
-
-    def update_pub(e):
-
-        pub_service.update_pub(
-            int(pub_id_field.value),
-            address_field.value,
-            league_field.value
-        )
-
-        page.snack_bar = ft.SnackBar(
-            ft.Text("펍 수정 완료")
-        )
-
-        page.snack_bar.open = True
-        page.update()
-        show_pubs(None)
-
-    # =====================
-    # 펍 삭제
-    # =====================
-
-    def delete_pub(e):
-
-        pub_service.delete_pub(
-            int(pub_id_field.value)
-        )
-
-        page.snack_bar = ft.SnackBar(
-            ft.Text("펍 삭제 완료")
-        )
-
-        page.snack_bar.open = True
-        page.update()
-        show_pubs(None)
-
-    # =====================
-    # JOIN 기반 펍 추천
-    # =====================
-
-    def recommend_pub(e):
-
-        result_area.controls.clear()
-        if match_dropdown.value is None:
-
-            page.snack_bar = ft.SnackBar(
-                ft.Text("경기를 먼저 선택하세요.")
+    def recommend_pub(e=None):
+        title_text.value = "🎯 펍 추천"
+        content_area.controls.clear()
+        content_area.controls.append(
+            ft.Row(
+                spacing=10,
+                controls=[
+                    match_dropdown,
+                    ft.ElevatedButton("추천 받기", on_click=_do_recommend)
+                ]
             )
+        )
+        page.update()
 
+    def _do_recommend(e):
+        while len(content_area.controls) > 1:
+            content_area.controls.pop()
+
+        if match_dropdown.value is None:
+            page.snack_bar = ft.SnackBar(ft.Text("경기를 먼저 선택하세요."))
             page.snack_bar.open = True
             page.update()
             return
 
         match_id = int(match_dropdown.value)
-
         pubs = pub_service.recommend_pubs(match_id)
-        
 
         if pubs:
-
-            result_area.controls.append(
+            content_area.controls.append(
                 ft.Text(
-                    f"{pubs[0]['home_team']} VS {pubs[0]['away_team']}",
-                    size=24,
-                    weight="bold"
-                )
-            )
-
-            # 추천 경기 정보 표시
-            result_area.controls.append(
-                ft.Text(
-                    f"선택한 경기 ID : {match_id}",
-                    size=20,
-                    weight="bold"
+                    f"{pubs[0]['home_team']} VS {pubs[0]['away_team']} 추천 펍",
+                    size=18, weight="bold"
                 )
             )
 
         for pub in pubs:
-
-            result_area.controls.append(
+            content_area.controls.append(
                 ft.Card(
                     content=ft.Container(
-                        padding=10,
-                        content=ft.Column([
-
-                            ft.Text(
-                                pub["pub_name"],
-                                size=18,
-                                weight="bold"
-                            ),
-
-                            ft.Text(
-                                pub["address"]
-                            ),
-
-                            ft.Text(
-                                pub["main_league"]
-                            ),
-
-                            ft.Image(
-                                src=pub["pub_image_path"],
-                                width=250
-                            )
-                        ])
+                        padding=14,
+                        content=ft.Column(
+                            spacing=4,
+                            controls=[
+                                ft.Text(pub["pub_name"], size=16, weight="bold"),
+                                ft.Text(pub["address"], size=13),
+                                ft.Text(pub["main_league"], size=12),
+                                ft.Image(src=pub["pub_image_path"],
+                                         width=200, height=120),
+                            ]
+                        )
                     )
                 )
             )
-
-        page.update()
-
-    def search_club(e):
-
-        result_area.controls.clear()
-
-        clubs = club_service.search_club(
-            club_search_field.value
-        )
-
-        for club in clubs:
-
-            result_area.controls.append(
-                ft.Text(
-                    club["team_name"]
-                )
-            )
-
-        page.update()
-
-    def search_match(e):
-
-        result_area.controls.clear()
-
-        matches = match_service.search_match_by_date(
-            date_field.value
-        )
-
-        for match in matches:
-
-            result_area.controls.append(
-                ft.Text(
-                    f"{match['home_team_id']} VS {match['away_team_id']}"
-                )
-            )
-
         page.update()
 
     # =====================
-    # 화면 구성
+    # 펍 관리 다이얼로그
     # =====================
+    def close_pub_dialog(e):
+        pub_dialog.open = False
+        page.update()
 
-    page.add(
-        
-
-        ft.Text(
-            "⚽ 해외축구(EPL) 시청 가이드",
-            size=30,
-            weight="bold"
-        ),
-
-        ft.Row([
-            # ft.ElevatedButton(
-            #     "날짜 검색",
-            #     on_click=search_match
-            # ),
-
-            ft.ElevatedButton(
-                "구단 조회",
-                on_click=show_clubs
-            ),
-            ft.ElevatedButton(
-                "구단 검색",
-                on_click=search_club
-            ),
-
-            ft.ElevatedButton(
-                "경기 조회",
-                on_click=show_matches
-            ),
-
-            ft.ElevatedButton(
-                "펍 조회",
-                on_click=show_pubs
-            ),
-
-            ft.ElevatedButton(
-                "펍 추천",
-                on_click=recommend_pub
+    pub_dialog = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("🍺 펍 관리", size=20, weight="bold"),
+        content=ft.Container(
+            width=420,
+            content=ft.Column(
+                tight=True, spacing=10,
+                controls=[
+                    pub_id_field, pub_name_field,
+                    address_field, league_field, image_field,
+                    ft.Row(
+                        spacing=8,
+                        controls=[
+                            ft.ElevatedButton("펍 등록",
+                                              on_click=lambda e: _pub_action("add")),
+                            ft.ElevatedButton("펍 수정",
+                                              on_click=lambda e: _pub_action("update")),
+                            ft.ElevatedButton("펍 삭제",
+                                              on_click=lambda e: _pub_action("delete")),
+                        ]
+                    )
+                ]
             )
-
-        ]),
-
-        ft.Divider(),
-
-        ft.Text(
-            "펍 관리",
-            size=20,
-            weight="bold"
         ),
-
-        pub_id_field,
-        pub_name_field,
-        address_field,
-        league_field,
-        image_field,
-        match_dropdown,
-        club_search_field,
-        #date_field,
-
-        ft.Row([
-
-            ft.ElevatedButton(
-                "펍 등록",
-                on_click=add_pub
-            ),
-
-            ft.ElevatedButton(
-                "펍 수정",
-                on_click=update_pub
-            ),
-
-            ft.ElevatedButton(
-                "펍 삭제",
-                on_click=delete_pub
-            )
-
-        ]),
-
-        ft.Divider(),
-
-        result_area
+        actions=[ft.TextButton("닫기", on_click=close_pub_dialog)],
     )
+
+    def _pub_action(action):
+        if action == "add":
+            pub_service.add_pub(pub_name_field.value, address_field.value,
+                                league_field.value, image_field.value)
+            msg = "펍 등록 완료"
+        elif action == "update":
+            pub_service.update_pub(int(pub_id_field.value),
+                                   address_field.value, league_field.value)
+            msg = "펍 수정 완료"
+        else:
+            pub_service.delete_pub(int(pub_id_field.value))
+            msg = "펍 삭제 완료"
+
+        for f in [pub_id_field, pub_name_field, address_field, league_field, image_field]:
+            f.value = ""
+
+        page.snack_bar = ft.SnackBar(ft.Text(msg))
+        page.snack_bar.open = True
+        page.update()
+        show_pubs()
+
+    def open_pub_dialog(e):
+        page.dialog = pub_dialog
+        pub_dialog.open = True
+        page.update()
+
+    # =====================
+    # 구단 검색 다이얼로그
+    # =====================
+    def close_search_dialog(e):
+        search_dialog.open = False
+        page.update()
+
+    def _do_search(e):
+        close_search_dialog(e)
+        search_club()
+
+    search_dialog = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("🔍 구단 검색", size=20, weight="bold"),
+        content=ft.Container(
+            width=360,
+            content=ft.Row(
+                spacing=8,
+                controls=[
+                    club_search_field,
+                    ft.ElevatedButton("검색", on_click=_do_search)
+                ]
+            )
+        ),
+        actions=[ft.TextButton("닫기", on_click=close_search_dialog)],
+    )
+
+    def open_search_dialog(e):
+        page.dialog = search_dialog
+        search_dialog.open = True
+        page.update()
+
+    # =====================
+    # 드로어 (햄버거 메뉴)
+    # =====================
+    def close_drawer(e=None):
+        drawer.open = False
+        page.update()
+
+    def nav(fn):
+        def handler(e):
+            close_drawer()
+            fn()
+        return handler
+
+    drawer = ft.NavigationDrawer(
+        controls=[
+            ft.Container(height=12),
+            ft.Text("  ⚽ 메뉴", size=18, weight="bold"),
+            ft.Divider(height=16),
+            ft.ListTile(
+                title=ft.Text("⚽  구단 목록"),
+                on_click=nav(show_clubs),
+            ),
+            ft.ListTile(
+                title=ft.Text("🔍  구단 검색"),
+                on_click=lambda e: (close_drawer(), open_search_dialog(e)),
+            ),
+            ft.ListTile(
+                title=ft.Text("📅  경기 일정"),
+                on_click=nav(show_matches),
+            ),
+            ft.ListTile(
+                title=ft.Text("🍺  펍 목록"),
+                on_click=nav(show_pubs),
+            ),
+            ft.ListTile(
+                title=ft.Text("🎯  펍 추천"),
+                on_click=nav(recommend_pub),
+            ),
+            ft.Divider(height=16),
+            ft.ListTile(
+                title=ft.Text("⚙️  펍 관리"),
+                on_click=lambda e: (close_drawer(), open_pub_dialog(e)),
+            ),
+        ]
+    )
+
+    page.drawer = drawer
+
+    def open_drawer(e):
+        page.drawer.open = True
+        page.update()
+
+    # =====================
+    # 앱 바 — 햄버거를 TextButton으로
+    # =====================
+    page.appbar = ft.AppBar(
+        leading=ft.TextButton(
+            text="☰",
+            on_click=open_drawer,
+            style=ft.ButtonStyle(padding=0),
+        ),
+        leading_width=48,
+        title=title_text,
+    )
+
+    # =====================
+    # 메인 레이아웃
+    # =====================
+    page.add(
+        ft.Container(
+            padding=16,
+            content=content_area,
+            expand=True,
+        )
+    )
+
+    show_clubs()
 
 
 ft.app(target=main)
