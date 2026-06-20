@@ -4,13 +4,13 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -7.6753,
-    "scrollLeft": -4.3633,
-    "zoomLevel": 1,
-    "show": 419,
+    "scrollTop": -82.6737,
+    "scrollLeft": -51.9849,
+    "zoomLevel": 0.97,
+    "show": 295,
     "database": 4,
     "databaseName": "soccer_guide",
-    "canvasType": "@dineug/erd-editor/builtin-schema-sql",
+    "canvasType": "ERD",
     "language": 1,
     "tableNameCase": 4,
     "columnNameCase": 2,
@@ -505,7 +505,7 @@
           "columnIds": [
             "0b0456761da0492fa6a5"
           ],
-          "x": 407,
+          "x": 453,
           "y": 130,
           "direction": 2
         },
@@ -533,7 +533,7 @@
           "columnIds": [
             "69ebe6c4b1e84719ba9b"
           ],
-          "x": 407,
+          "x": 453,
           "y": 230,
           "direction": 2
         },
@@ -561,7 +561,7 @@
           "columnIds": [
             "a619cd1f3b2f4faa95b0"
           ],
-          "x": 380,
+          "x": 426,
           "y": 520,
           "direction": 2
         },

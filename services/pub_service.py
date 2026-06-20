@@ -32,12 +32,14 @@ class PubService:
     def update_pub(
         self,
         pub_id,
+        pub_name,
         address,
         league
     ):
 
         self.pub_repo.update_pub(
             pub_id,
+            pub_name,
             address,
             league
         )

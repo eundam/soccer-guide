@@ -52,19 +52,26 @@ class PubRepository:
     def update_pub(
         self,
         pub_id,
+        pub_name,
         address,
         main_league
     ):
+        # 입력값이 비어 있으면(빈 문자열) 해당 칸은 수정하지 않고
+        # 기존 값을 그대로 유지한다.
+        # NULLIF(?, '') : 입력이 ''이면 NULL로 바꾸고,
+        # COALESCE(NULL, 기존컬럼) : NULL이면 기존 값을 사용한다.
 
         conn = get_connection()
 
         conn.execute("""
             UPDATE Soccer_Pub
-            SET address = ?,
-                main_league = ?
+            SET pub_name    = COALESCE(NULLIF(?, ''), pub_name),
+                address     = COALESCE(NULLIF(?, ''), address),
+                main_league = COALESCE(NULLIF(?, ''), main_league)
             WHERE pub_id = ?
         """,
         (
+            pub_name,
             address,
             main_league,
             pub_id

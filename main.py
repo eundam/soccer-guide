@@ -255,6 +255,7 @@ def main(page: ft.Page):
             msg = "펍 등록 완료"
         elif action == "update":
             pub_service.update_pub(int(pub_id_field.value),
+                                   pub_name_field.value,
                                    address_field.value, league_field.value)
             msg = "펍 수정 완료"
         else:
